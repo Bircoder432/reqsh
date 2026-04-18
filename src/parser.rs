@@ -1,6 +1,6 @@
 use crate::context::RequestContext;
 use crate::help;
-use crate::request::{Request, RequestMethod};
+use crate::request::{Request, RequestMethod, fetch};
 
 pub struct ShellCommand {
     pub name: String,
@@ -195,7 +195,7 @@ impl ShellCommand {
             "run" => {
                 if self.args.len() == 1 {
                     if let Some(request) = ctx.get_saved_request(&self.args[0]) {
-                        let response = request.fetch(ctx.get_base_url());
+                        let response = fetch(request, ctx.get_base_url());
                         output = format!("{response}");
                     } else {
                         output = format!("No saved request found with name '{}'", self.args[0]);
@@ -227,7 +227,7 @@ impl ShellCommand {
             "GET" => {
                 if self.args.len() == 1 {
                     let request = Request::new(RequestMethod::GET, self.args[0].clone(), None);
-                    let response = request.fetch(ctx.get_base_url());
+                    let response = fetch(&request, ctx.get_base_url());
                     output = format!("{}", response);
                 } else {
                     output = format!("Usage: GET <url>");
@@ -235,13 +235,13 @@ impl ShellCommand {
             }
 
             "POST" => {
-                if self.args.len() >= 1 {
+                if self.args.len() == 2 {
                     let request = Request::new(
                         RequestMethod::POST,
                         self.args[0].clone(),
                         Some(self.args[1].clone()),
                     );
-                    let response = request.fetch(ctx.get_base_url());
+                    let response = fetch(&request, ctx.get_base_url());
                     output = format!("{}", response);
                 } else {
                     output = format!("Usage POST <url> <body>");

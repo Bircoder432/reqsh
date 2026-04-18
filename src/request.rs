@@ -34,28 +34,28 @@ impl Request {
             body,
         }
     }
+}
 
-    pub fn fetch(&self, base_url: Option<&str>) -> String {
-        let full_url = match base_url {
-            Some(base) => format!("{}{}", base, self.url),
-            None => format!("{}", self.url),
-        };
+pub fn fetch(request: &Request, base_url: Option<&str>) -> String {
+    let full_url = match base_url {
+        Some(base) => format!("{}{}", base, request.url),
+        None => format!("{}", request.url),
+    };
 
-        let body = match &self.body {
-            Some(data) => format!("{}", data),
-            None => format!(""),
-        };
+    let body = match &request.body {
+        Some(data) => format!("{}", data),
+        None => format!(""),
+    };
 
-        let response = Command::new("curl")
-            .args(["-X", &self.method.as_str(), &full_url, "-d", &body])
-            .output()
-            .map_err(|err| err.to_string())
-            .unwrap();
+    let response = Command::new("curl")
+        .args(["-X", &request.method.as_str(), &full_url, "-d", &body])
+        .output()
+        .map_err(|err| err.to_string())
+        .unwrap();
 
-        if response.status.success() {
-            String::from_utf8(response.stdout).unwrap().to_string()
-        } else {
-            String::from_utf8(response.stderr).unwrap().to_string()
-        }
+    if response.status.success() {
+        String::from_utf8(response.stdout).unwrap().to_string()
+    } else {
+        String::from_utf8(response.stderr).unwrap().to_string()
     }
 }
