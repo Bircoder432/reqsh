@@ -1,6 +1,7 @@
 use crate::context::RequestContext;
 use crate::help;
-use crate::request::{Request, RequestMethod, fetch};
+use crate::http::fetch;
+use crate::request::{Request, RequestMethod};
 
 pub struct ShellCommand {
     pub name: String,
@@ -181,8 +182,6 @@ impl ShellCommand {
                     let method = match self.args[1].as_str() {
                         "GET" => RequestMethod::GET,
                         "POST" => RequestMethod::POST,
-                        "PUT" => RequestMethod::PUT,
-                        "DELETE" => RequestMethod::DELETE,
                         _ => RequestMethod::GET,
                     };
 

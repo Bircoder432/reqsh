@@ -1,5 +1,3 @@
-use std::process::Command;
-
 pub struct Request {
     pub method: RequestMethod,
     pub url: String,
@@ -10,8 +8,6 @@ pub struct Request {
 pub enum RequestMethod {
     GET,
     POST,
-    PUT,
-    DELETE,
 }
 
 impl RequestMethod {
@@ -19,8 +15,6 @@ impl RequestMethod {
         match self {
             RequestMethod::GET => "GET",
             RequestMethod::POST => "POST",
-            RequestMethod::PUT => "PUT",
-            RequestMethod::DELETE => "DELETE",
         }
     }
 }
@@ -33,29 +27,5 @@ impl Request {
             headers: Vec::new(),
             body,
         }
-    }
-}
-
-pub fn fetch(request: &Request, base_url: Option<&str>) -> String {
-    let full_url = match base_url {
-        Some(base) => format!("{}{}", base, request.url),
-        None => format!("{}", request.url),
-    };
-
-    let body = match &request.body {
-        Some(data) => format!("{}", data),
-        None => format!(""),
-    };
-
-    let response = Command::new("curl")
-        .args(["-X", &request.method.as_str(), &full_url, "-d", &body])
-        .output()
-        .map_err(|err| err.to_string())
-        .unwrap();
-
-    if response.status.success() {
-        String::from_utf8(response.stdout).unwrap().to_string()
-    } else {
-        String::from_utf8(response.stderr).unwrap().to_string()
     }
 }
