@@ -1,5 +1,6 @@
-use crate::request::{Request, RequestMethod};
 use std::collections::HashMap;
+
+use crate::request::{Method, Request};
 
 pub struct RequestContext {
     base_url: Option<String>,
@@ -22,19 +23,17 @@ impl RequestContext {
         self.base_url = Some(url.to_string());
     }
 
-    pub fn save_request(&mut self, name: &str, method: RequestMethod, url: &str) {
-        let request = Request {
-            method,
-            url: url.to_string(),
-            headers: Vec::new(),
-            body: None,
-        };
-
+    pub fn save_request(&mut self, name: &str, method: Method, url: String) {
+        let request = Request::new(method, url);
         self.saved_requests.insert(name.to_string(), request);
     }
 
     pub fn get_saved_request(&self, name: &str) -> Option<&Request> {
         self.saved_requests.get(name)
+    }
+
+    pub fn get_saved_request_mut(&mut self, name: &str) -> Option<&mut Request> {
+        self.saved_requests.get_mut(name)
     }
 
     pub fn list_saved_requests(&self) -> Vec<String> {

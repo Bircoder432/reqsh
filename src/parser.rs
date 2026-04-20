@@ -1,7 +1,7 @@
 use crate::context::RequestContext;
 use crate::help;
 use crate::http::fetch;
-use crate::request::{Request, RequestMethod};
+use crate::request::{Method, Request};
 
 pub struct ShellCommand {
     pub name: String,
@@ -179,13 +179,13 @@ impl ShellCommand {
             "save" => {
                 if self.args.len() == 3 {
                     output = format!("Saved request '{}'", self.args[0]);
-                    let method = match self.args[1].as_str() {
-                        "GET" => RequestMethod::GET,
-                        "POST" => RequestMethod::POST,
-                        _ => RequestMethod::GET,
-                    };
-
-                    ctx.save_request(&self.args[0], method, &self.args[2]);
+                    if self.args[1] == "GET" {
+                        ctx.save_request(&self.args[0], Method::GET, self.args[2].clone());
+                    } else if self.args[1] == "POST" {
+                        ctx.save_request(&self.args[0], Method::GET, self.args[2].clone());
+                    } else {
+                        output = format!("Incorrect method");
+                    }
                 } else {
                     output = format!("Usage: save <request_name> <method> <url>");
                 }
@@ -195,7 +195,7 @@ impl ShellCommand {
                 if self.args.len() == 1 {
                     if let Some(request) = ctx.get_saved_request(&self.args[0]) {
                         let response = fetch(request, ctx.get_base_url());
-                        output = format!("{response}");
+                        output = format!("{}", response);
                     } else {
                         output = format!("No saved request found with name '{}'", self.args[0]);
                     }
@@ -225,7 +225,7 @@ impl ShellCommand {
 
             "GET" => {
                 if self.args.len() == 1 {
-                    let request = Request::new(RequestMethod::GET, self.args[0].clone(), None);
+                    let request = Request::new(Method::GET, self.args[0].clone());
                     let response = fetch(&request, ctx.get_base_url());
                     output = format!("{}", response);
                 } else {
@@ -234,16 +234,50 @@ impl ShellCommand {
             }
 
             "POST" => {
-                if self.args.len() == 2 {
-                    let request = Request::new(
-                        RequestMethod::POST,
-                        self.args[0].clone(),
-                        Some(self.args[1].clone()),
-                    );
+                if self.args.len() >= 1 {
+                    let mut request = Request::new(Method::POST, self.args[0].clone());
+                    if let Some(body) = self.args.get(2) {
+                        request.set_body(body);
+                    }
                     let response = fetch(&request, ctx.get_base_url());
                     output = format!("{}", response);
                 } else {
-                    output = format!("Usage POST <url> <body>");
+                    output = format!("Usage: POST <url> <body>");
+                }
+            }
+
+            "headers" => {
+                if self.args.len() == 1 {
+                    if let Some(request) = ctx.get_saved_request(&self.args[0]) {
+                        output = format!("Headers for '{}':\n", self.args[0]);
+                        for (key, value) in &request.headers {
+                            output.push_str(&format!("  {}: {}\n", key, value));
+                        }
+                    } else {
+                        output = format!("No saved request found with name '{}'", self.args[0]);
+                    }
+                } else if self.args.len() == 4 && self.args[0] == "set" {
+                    if let Some(request) = ctx.get_saved_request_mut(&self.args[1]) {
+                        request
+                            .set_header(self.args[2].clone().to_lowercase(), self.args[3].clone());
+                        output = format!(
+                            "Set header '{}' to '{}' for request '{}'",
+                            self.args[2], self.args[3], self.args[1]
+                        );
+                    } else {
+                        output = format!("No saved request found with name '{}'", self.args[1]);
+                    }
+                } else if self.args.len() == 2 && self.args[0] == "clear" {
+                    if let Some(request) = ctx.get_saved_request_mut(&self.args[1]) {
+                        request.headers.clear();
+                        output = format!("Cleared headers for request '{}'", self.args[1]);
+                    } else {
+                        output = format!("No saved request found with name '{}'", self.args[1]);
+                    }
+                } else {
+                    output = format!(
+                        "Usage: headers <request_name> OR headers set <request_name> <header_key> <header_value> OR headers clear <request_name>"
+                    );
                 }
             }
 

@@ -1,31 +1,41 @@
+use std::collections::HashMap;
+
 pub struct Request {
-    pub method: RequestMethod,
+    pub method: Method,
     pub url: String,
-    pub headers: Vec<(String, String)>,
+    pub headers: HashMap<String, String>,
     pub body: Option<String>,
 }
 
-pub enum RequestMethod {
+impl Request {
+    pub fn new(method: Method, url: String) -> Self {
+        Self {
+            method,
+            url,
+            headers: HashMap::new(),
+            body: None,
+        }
+    }
+
+    pub fn set_body(&mut self, content: &str) {
+        self.body = Some(content.to_string());
+    }
+
+    pub fn set_header(&mut self, key: String, value: String) {
+        self.headers.insert(key, value);
+    }
+}
+
+pub enum Method {
     GET,
     POST,
 }
 
-impl RequestMethod {
+impl Method {
     pub fn as_str(&self) -> &'static str {
         match self {
-            RequestMethod::GET => "GET",
-            RequestMethod::POST => "POST",
-        }
-    }
-}
-
-impl Request {
-    pub fn new(method: RequestMethod, url: String, body: Option<String>) -> Self {
-        Self {
-            method,
-            url,
-            headers: Vec::new(),
-            body,
+            Method::GET => "GET",
+            Method::POST => "POST",
         }
     }
 }
