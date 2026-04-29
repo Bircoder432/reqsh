@@ -30,6 +30,7 @@ pub enum Method {
     GET,
     POST,
     PUT,
+    DELETE,
 }
 
 impl Method {
@@ -38,6 +39,7 @@ impl Method {
             Method::GET => "GET",
             Method::POST => "POST",
             Method::PUT => "PUT",
+            Method::DELETE => "DELETE",
         }
     }
 }

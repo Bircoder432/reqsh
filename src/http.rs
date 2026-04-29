@@ -25,6 +25,7 @@ pub fn fetch(request: &Request, base_url: Option<&str>) -> String {
     match request.method {
         Method::GET => {
             let res = client.get(full_url).headers(headers).send();
+
             match res {
                 Ok(response) => response.text().unwrap(),
                 Err(e) => return format!("{}", e),
@@ -54,6 +55,15 @@ pub fn fetch(request: &Request, base_url: Option<&str>) -> String {
             }
 
             let res = req_builder.send();
+
+            match res {
+                Ok(response) => response.text().unwrap(),
+                Err(e) => format!("{}", e),
+            }
+        }
+
+        Method::DELETE => {
+            let res = client.delete(full_url).headers(headers).send();
 
             match res {
                 Ok(response) => response.text().unwrap(),

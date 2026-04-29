@@ -174,6 +174,16 @@ pub fn execute(cmd: &ShellCommand, ctx: &mut RequestContext) -> ShellOutput {
             }
         }
 
+        "DELETE" => {
+            if cmd.args.len() == 1 {
+                let request = Request::new(Method::DELETE, cmd.args[0].clone());
+                let response = fetch(&request, ctx.get_base_url());
+                output = format!("{}", response);
+            } else {
+                output = format!("Usage: DELETE <url>");
+            }
+        }
+
         _ => {
             output = format!("ReferenceError: {} is not defined", cmd.name);
         }
