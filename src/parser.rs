@@ -63,11 +63,6 @@ pub fn parse_request(buffer: String) -> Result<Request, String> {
             Some(body_part.trim().to_string())
         };
 
-        println!(
-            "{:?} \n{:?} \n{:?} \n{:?} \n{:?} \n{:?}",
-            header_part, header_lines, req_parts, headers, body_part, body
-        );
-
         Ok(Request {
             method,
             path: path.to_string(),

@@ -34,21 +34,12 @@ reqsh> run getUsers
 
 ## Commands
 
-- `GET <url>` — send GET request
-- `POST <url>` — send POST request
-- `PUT <url> <body>` - send PUT request
-- `DELETE <url>` - send DELETE request
-- `save <name>` — save last request
-- `run <name>` — run saved request
-- `list` — list saved requests
-- `delete <name>` — delete request
-- `set base_url <url>` — set base URL
-- `headers set <name> <key> <value>` - set headers for saved requests
-- `headers clear` - clear all headers
-- `env set <key> <value>` - set simple env variables
-- `env list` - list env variables
-- `env delete <key>` - delete variable
-- `env clear` - clear all env variables
+- `GET <url> [headers]` — send GET request
+- `POST <url> [headers] [body]` — send POST request
+- `PUT <url> [headers] [body]` - send PUT request
+- `DELETE <url> [headers][body]` - send DELETE request
+- `base <url>` — set base URL
+- `header <key> <value>` - set headers for saved requests
 - `exit` — quit
 - `help` — help
 

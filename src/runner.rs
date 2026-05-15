@@ -1,11 +1,14 @@
 use crate::request::{Method, Request};
 use reqwest::{
-    blocking::Client,
+    blocking::{Client, RequestBuilder},
     header::{HeaderMap, HeaderName, HeaderValue},
 };
 
 pub fn fetch(request: &Request, base_url: Option<&str>) -> Result<String, String> {
+    // Client
     let client = Client::new();
+
+    // Url Constructor
     let full_url = if (request.path.starts_with("/"))
         && let Some(base_url) = base_url
     {
@@ -14,6 +17,18 @@ pub fn fetch(request: &Request, base_url: Option<&str>) -> Result<String, String
         request.path.clone()
     };
 
+    // Request Builder
+    let mut req_builder: RequestBuilder;
+
+    // Method
+    req_builder = match request.method {
+        Method::GET => client.get(full_url),
+        Method::POST => client.post(full_url),
+        Method::PUT => client.put(full_url),
+        Method::DELETE => client.delete(full_url),
+    };
+
+    // Headers
     let mut headers = HeaderMap::new();
     for (key, value) in &request.headers {
         headers.insert(
@@ -21,54 +36,18 @@ pub fn fetch(request: &Request, base_url: Option<&str>) -> Result<String, String
             HeaderValue::from_bytes(value.as_bytes()).unwrap(),
         );
     }
+    req_builder = req_builder.headers(headers);
 
-    match request.method {
-        Method::GET => {
-            let res = client.get(full_url).headers(headers).send();
+    // Body
+    if let Some(body) = &request.body {
+        req_builder = req_builder.body(body.clone());
+    }
 
-            match res {
-                Ok(response) => Ok(response.text().unwrap()),
-                Err(e) => return Err(format!("{}", e)),
-            }
-        }
+    // Response
+    let res = req_builder.send();
 
-        Method::POST => {
-            let mut req_builder = client.post(full_url).headers(headers);
-
-            if let Some(body) = &request.body {
-                req_builder = req_builder.body(body.clone());
-            }
-
-            let res = req_builder.send();
-
-            match res {
-                Ok(response) => Ok(response.text().unwrap()),
-                Err(e) => return Err(format!("{}", e)),
-            }
-        }
-
-        Method::PUT => {
-            let mut req_builder = client.put(full_url).headers(headers);
-
-            if let Some(body) = &request.body {
-                req_builder = req_builder.body(body.clone())
-            }
-
-            let res = req_builder.send();
-
-            match res {
-                Ok(response) => Ok(response.text().unwrap()),
-                Err(e) => return Err(format!("{}", e)),
-            }
-        }
-
-        Method::DELETE => {
-            let res = client.delete(full_url).headers(headers).send();
-
-            match res {
-                Ok(response) => Ok(response.text().unwrap()),
-                Err(e) => return Err(format!("{}", e)),
-            }
-        }
+    match res {
+        Ok(response) => Ok(response.text().unwrap()),
+        Err(e) => return Err(format!("{}", e)),
     }
 }
