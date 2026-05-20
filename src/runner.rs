@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::request::{Method, Request};
 use reqwest::{
-    blocking::{Client, RequestBuilder},
+    blocking::{Client, RequestBuilder, Response},
     header::{HeaderMap, HeaderName, HeaderValue},
 };
 
@@ -10,7 +10,7 @@ pub fn fetch(
     request: &Request,
     base_url: Option<&str>,
     global_headers: &HashMap<String, String>,
-) -> Result<String, String> {
+) -> Result<Response, String> {
     // Client
     let client = Client::new();
 
@@ -20,7 +20,9 @@ pub fn fetch(
     {
         format!("{base_url}{}", request.path)
     } else {
-        request.path.clone()
+        return Err(String::from(
+            "Base URL not found. Use base <url> to add base url",
+        ));
     };
 
     // Request Builder
@@ -59,10 +61,10 @@ pub fn fetch(
     }
 
     // Response
-    let res = req_builder.send();
+    let result = req_builder.send();
 
-    match res {
-        Ok(response) => Ok(response.text().unwrap()),
+    match result {
+        Ok(response) => Ok(response),
         Err(e) => return Err(format!("{}", e)),
     }
 }

@@ -1,4 +1,7 @@
-use crate::{help::get_help, parser::Command, request::Request, runner::fetch, state::State};
+use crate::{
+    display::display_response, help::get_help, parser::Command, request::Request, runner::fetch,
+    state::State,
+};
 
 pub fn execute_command(cmd: Command, ctx: &mut State) -> Result<(), String> {
     match cmd {
@@ -22,5 +25,10 @@ pub fn execute_request(req: Request, ctx: &mut State) -> Result<String, String> 
     let base_url = ctx.get_base_url();
     let global_headers = ctx.get_headers();
 
-    fetch(&req, base_url, global_headers)
+    let response = fetch(&req, base_url, global_headers);
+
+    match response {
+        Ok(r) => Ok(display_response(r)),
+        Err(e) => Err(e),
+    }
 }

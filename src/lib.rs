@@ -1,3 +1,4 @@
+pub mod display;
 pub mod executor;
 pub mod help;
 pub mod helper;
