@@ -1,34 +1,38 @@
 use std::collections::HashMap;
 
-use crate::request::{Method, Request};
+use crate::{
+    builtin::Builtin,
+    request::{Method, Request},
+};
 
-const METHODS: &[&str] = &["GET", "POST", "PUT", "DELETE"];
-const COMMANDS: &[&str] = &["base", "header", "help"];
-
-pub enum InputType {
-    Request,
-    Command,
-    Error(String),
+pub enum Parsed {
+    Builtin(Builtin),
+    Request(Request),
     Exit,
 }
 
-impl InputType {
-    pub fn get(line: &str) -> Self {
-        let tokens: Vec<&str> = line.split_whitespace().collect();
-        let first_token = tokens[0];
-        if first_token == "exit" {
-            InputType::Exit
-        } else if METHODS.contains(&first_token) {
-            InputType::Request
-        } else if COMMANDS.contains(&first_token) {
-            InputType::Command
-        } else {
-            InputType::Error(format!("Reference Error: {} not defined", first_token))
+pub fn parse(input: String) -> Result<Parsed, String> {
+    let first_line = input.lines().next().unwrap();
+    let tokens: Vec<&str> = first_line.split_whitespace().collect();
+
+    match tokens[0] {
+        "GET" | "POST" | "PUT" | "DELETE" => {
+            let result = parse_request(input)?;
+            return Ok(Parsed::Request(result));
         }
+
+        "base" | "header" | "help" | "history" | "rerun" => {
+            let result = parse_builtin(input)?;
+            Ok(Parsed::Builtin(result))
+        }
+
+        "exit" => Ok(Parsed::Exit),
+
+        _ => Err(format!("Reference Error: {} not defined", { tokens[0] })),
     }
 }
 
-pub fn parse_request(buffer: String) -> Result<Request, String> {
+fn parse_request(buffer: String) -> Result<Request, String> {
     if let Some((header_part, body_part)) = buffer.split_once("\n\n") {
         let header_lines: Vec<&str> = header_part.split('\n').collect();
 
@@ -74,33 +78,36 @@ pub fn parse_request(buffer: String) -> Result<Request, String> {
     }
 }
 
-pub enum Command {
-    Base(String),
-    Header(String, String),
-    Help,
-}
-
-pub fn parse_command(line: &str) -> Result<Command, String> {
+fn parse_builtin(line: String) -> Result<Builtin, String> {
     let tokens: Vec<&str> = line.split_whitespace().collect();
     match tokens[0] {
         "base" => {
             if tokens.len() != 2 {
                 Err(format!("usage: base <url>"))
             } else {
-                Ok(Command::Base(tokens[1].to_string()))
+                Ok(Builtin::Base(tokens[1].to_string()))
             }
         }
         "header" => {
             if tokens.len() != 3 {
                 Err(format!("usage: header <key> <value>"))
             } else {
-                Ok(Command::Header(
+                Ok(Builtin::Header(
                     tokens[1].to_string(),
                     tokens[2].to_string(),
                 ))
             }
         }
-        "help" => Ok(Command::Help),
+        "help" => Ok(Builtin::Help),
+        "history" => Ok(Builtin::History),
+        "rerun" => {
+            if tokens.len() != 2 {
+                Err(format!("usage: rerun <index>"))
+            } else {
+                let idx: usize = tokens[1].parse().unwrap();
+                Ok(Builtin::Rerun(idx))
+            }
+        }
         _ => Err(format!("Invalid Command")),
     }
 }
