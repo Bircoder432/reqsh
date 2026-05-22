@@ -26,19 +26,41 @@ pub fn display_response(res: Response) -> String {
 
     output.push_str(&status_line);
 
-    for (k, v) in res.headers() {
+    let mut is_json_body = false;
+
+    for (key, value) in res.headers() {
         let line = format!(
             "{}: {}\n",
-            k.as_str().cyan().bold(),
-            v.to_str().unwrap_or("")
+            key.as_str().cyan().bold(),
+            value.to_str().unwrap_or("")
         );
+
+        if key.as_str().to_lowercase() == "content-type"
+            && value.to_str().unwrap_or("").contains("application/json")
+        {
+            is_json_body = true;
+        }
 
         output.push_str(&line);
     }
 
     output.push_str("\n");
 
-    let body = res.text().unwrap_or_default();
+    let raw = res.text().unwrap_or_default();
+    let body;
+
+    if is_json_body {
+        match serde_json::from_str::<serde_json::Value>(&raw) {
+            Ok(json) => {
+                body = serde_json::to_string_pretty(&json).unwrap_or(raw);
+            }
+            Err(_) => {
+                body = raw;
+            }
+        }
+    } else {
+        body = raw;
+    }
 
     output.push_str(&body);
     output.push_str("\n");

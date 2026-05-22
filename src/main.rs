@@ -97,15 +97,30 @@ fn collect_input(rl: &mut Editor<ShellHelper, FileHistory>, first_line: String) 
 
     loop {
         let inner_rl = rl.readline(".....> ");
-        if let Ok(inner_line) = inner_rl {
-            if inner_line == "::send" {
+        match inner_rl {
+            Ok(inner_line) => {
+                if inner_line == "::send" {
+                    break;
+                }
+
+                buffer.push_str(&inner_line);
+                buffer.push_str("\n");
+            }
+
+            Err(ReadlineError::Interrupted) => {
+                buffer.clear();
+                continue;
+            }
+
+            Err(ReadlineError::Eof) => {
                 break;
             }
 
-            buffer.push_str(&inner_line);
-            buffer.push_str("\n");
-        } else {
-            break;
+            Err(err) => {
+                println!("Error: {:?}", err);
+                buffer.clear();
+                continue;
+            }
         }
     }
 
