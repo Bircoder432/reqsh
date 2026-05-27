@@ -13,6 +13,7 @@ pub enum Builtin {
     Header(String, String),
     History,
     Rerun(usize),
+    Set(String, String),
 }
 
 pub enum ControlFlow {
@@ -28,6 +29,10 @@ pub fn handle(
     match cmd {
         Builtin::Base(url) => {
             ctx.set_base_url(&url);
+        }
+
+        Builtin::Set(name, value) => {
+            ctx.set_variable(name, value);
         }
 
         Builtin::Header(k, v) => {

@@ -1,9 +1,51 @@
+use std::collections::HashMap;
+
 use crate::{display::display_response, request::Request, runner::fetch, state::ShellState};
 
+fn interpolate(s: &str, vars: &HashMap<String, String>) -> Result<String, String> {
+    let mut out = String::new();
+    let mut rest = s;
+    while let Some(start) = rest.find("{{") {
+        out.push_str(&rest[..start]);
+        let tail = &rest[start + 2..];
+        match tail.find("}}") {
+            Some(end) => {
+                let name = tail[..end].trim();
+                let val = vars
+                    .get(name)
+                    .ok_or_else(|| format!("undefined variable: {name}"))?;
+                out.push_str(val);
+                rest = &tail[end + 2..];
+            }
+            None => return Err(format!("unclosed `{{{{` in: {s}")),
+        }
+    }
+    out.push_str(rest);
+    Ok(out)
+}
+
 pub fn execute(req: Request, ctx: &ShellState) -> Result<String, String> {
+    let vars = ctx.get_variables();
+    let path = interpolate(&req.path, vars)?;
+    let body = match &req.body {
+        Some(b) => Some(interpolate(b, vars)?),
+        None => None,
+    };
+    let headers: HashMap<_, _> = req
+        .headers
+        .iter()
+        .map(|(k, v)| Ok((k.clone(), interpolate(v, vars)?)))
+        .collect::<Result<_, String>>()?;
+
+    let req = Request {
+        path,
+        body,
+        headers,
+        ..req
+    };
+
     let base_url = ctx.get_base_url();
     let global_headers = ctx.get_headers();
-
     let response = fetch(&req, base_url, global_headers);
 
     match response {
