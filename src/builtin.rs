@@ -14,6 +14,10 @@ pub enum Builtin {
     History,
     Rerun(usize),
     Set(String, String),
+    UnsetVariable(String),
+    UnsetHeader(String),
+    Headers,
+    Vars,
 }
 
 pub enum ControlFlow {
@@ -37,6 +41,26 @@ pub fn handle(
 
         Builtin::Header(k, v) => {
             ctx.set_header(k, v);
+        }
+
+        Builtin::Headers => {
+            for header in ctx.get_headers().iter() {
+                println!("{}: {}", header.0, header.1);
+            }
+        }
+
+        Builtin::Vars => {
+            for var in ctx.get_variables().iter() {
+                println!("{} = {}", var.0, var.1)
+            }
+        }
+
+        Builtin::UnsetVariable(name) => {
+            ctx.remove_variable(&name);
+        }
+
+        Builtin::UnsetHeader(key) => {
+            ctx.remove_header(&key);
         }
 
         Builtin::Help => {

@@ -19,7 +19,7 @@ pub fn parse(input: String) -> Result<Parsed, String> {
             Ok(Parsed::Request(result))
         }
 
-        "base" | "set" | "header" | "help" | "history" | "rerun" => {
+        "base" | "set" | "unset" | "header" | "headers" | "vars" | "help" | "history" | "rerun" => {
             let result = parse_builtin(input)?;
             Ok(Parsed::Builtin(result))
         }
@@ -97,6 +97,15 @@ fn parse_builtin(line: String) -> Result<Builtin, String> {
                 Ok(Builtin::Set(tokens[1].to_string(), tokens[2].to_string()))
             }
         }
+        "unset" => {
+            if tokens.len() == 2 {
+                Ok(Builtin::UnsetVariable(tokens[1].to_string()))
+            } else if tokens.len() == 3 && tokens[1] == "header" {
+                Ok(Builtin::UnsetHeader(tokens[2].to_string()))
+            } else {
+                Err("usage: unset <name>\n       unset header <key>".to_string())
+            }
+        }
         "header" => {
             if tokens.len() != 3 {
                 Err("usage: header <key> <value>".to_string())
@@ -107,13 +116,31 @@ fn parse_builtin(line: String) -> Result<Builtin, String> {
                 ))
             }
         }
+        "headers" => {
+            if tokens.len() != 1 {
+                Err("usage: headers".to_string())
+            } else {
+                Ok(Builtin::Headers)
+            }
+        }
+        "vars" => {
+            if tokens.len() != 1 {
+                Err("usage: vars".to_string())
+            } else {
+                Ok(Builtin::Vars)
+            }
+        }
         "help" => Ok(Builtin::Help),
         "history" => Ok(Builtin::History),
         "rerun" => {
             if tokens.len() != 2 {
                 Err("usage: rerun <index>".to_string())
             } else {
-                let idx: usize = tokens[1].parse().unwrap();
+                let idx = tokens
+                    .get(1)
+                    .ok_or("missing index")?
+                    .parse::<usize>()
+                    .map_err(|e| format!("invalid index: {}", e))?;
                 Ok(Builtin::Rerun(idx))
             }
         }

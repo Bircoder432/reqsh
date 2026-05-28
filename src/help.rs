@@ -37,6 +37,11 @@ pub fn help_text() -> String {
   {}:
     base <url>
     header <key> <value>
+    set <name> <value>
+    unset <name>
+    unset header <key>
+    vars
+    headers
     history
     rerun <id>
     help

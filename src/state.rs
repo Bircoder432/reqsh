@@ -21,24 +21,24 @@ impl ShellState {
         }
     }
 
-    pub fn set_base_url(&mut self, url: &str) {
-        self.base_url = Some(url.to_string());
-    }
-
     pub fn get_base_url(&self) -> Option<&str> {
         self.base_url.as_deref()
     }
 
-    pub fn set_header(&mut self, key: String, value: String) {
-        self.headers.insert(key, value);
+    pub fn set_base_url(&mut self, url: &str) {
+        self.base_url = Some(url.to_string());
     }
 
     pub fn get_headers(&self) -> &HashMap<String, String> {
         &self.headers
     }
 
-    pub fn set_variable(&mut self, name: String, value: String) {
-        self.variables.insert(name, value);
+    pub fn set_header(&mut self, key: String, value: String) {
+        self.headers.insert(key, value);
+    }
+
+    pub fn remove_header(&mut self, key: &str) {
+        self.headers.remove(key);
     }
 
     pub fn get_variable(&self, name: &str) -> Option<&String> {
@@ -47,6 +47,14 @@ impl ShellState {
 
     pub fn get_variables(&self) -> &HashMap<String, String> {
         &self.variables
+    }
+
+    pub fn set_variable(&mut self, name: String, value: String) {
+        self.variables.insert(name, value);
+    }
+
+    pub fn remove_variable(&mut self, name: &str) {
+        self.variables.remove(name);
     }
 }
 
