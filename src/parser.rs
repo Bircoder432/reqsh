@@ -67,7 +67,19 @@ fn parse_request(buffer: String) -> Result<Request, String> {
         if reading_body {
             body_lines.push(*line);
         } else if let Some((key, value)) = line.split_once(':') {
-            request.set_header(key.trim().to_string(), value.trim().to_string());
+            let key = key.trim();
+            let value = value.trim();
+            if key.eq_ignore_ascii_case("param") {
+                if let Some((pk, pv)) = value.split_once('=') {
+                    request.set_param(pk.trim().to_string(), pv.trim().to_string());
+                } else {
+                    return Err(format!(
+                        "invalid param format: {value} (expected key=value)"
+                    ));
+                }
+            } else {
+                request.set_header(key.to_string(), value.to_string());
+            }
         } else {
             return Err("Invalid headers".to_string());
         }

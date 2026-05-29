@@ -5,6 +5,7 @@ pub struct Request {
     pub method: Method,
     pub path: String,
     pub headers: HashMap<String, String>,
+    pub params: HashMap<String, String>,
     pub body: Option<String>,
 }
 
@@ -14,6 +15,7 @@ impl Request {
             method,
             path,
             headers: HashMap::new(),
+            params: HashMap::new(),
             body: None,
         }
     }
@@ -24,6 +26,10 @@ impl Request {
 
     pub fn set_header(&mut self, key: String, value: String) {
         self.headers.insert(key, value);
+    }
+
+    pub fn set_param(&mut self, key: String, value: String) {
+        self.params.insert(key, value);
     }
 }
 

@@ -37,10 +37,17 @@ pub fn execute(req: Request, ctx: &ShellState) -> Result<String, String> {
         .map(|(k, v)| Ok((k.clone(), interpolate(v, vars)?)))
         .collect::<Result<_, String>>()?;
 
+    let params: HashMap<_, _> = req
+        .params
+        .iter()
+        .map(|(k, v)| Ok((k.clone(), interpolate(v, vars)?)))
+        .collect::<Result<_, String>>()?;
+
     let req = Request {
         path,
         body,
         headers,
+        params,
         ..req
     };
 

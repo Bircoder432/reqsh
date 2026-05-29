@@ -28,6 +28,7 @@ pub fn help_text() -> String {
 
   {}:
     <key>: <value>
+    param: <key>=<value>
 
   {}:
     raw, json

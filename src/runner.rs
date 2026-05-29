@@ -55,6 +55,11 @@ pub fn fetch(
     headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
     req_builder = req_builder.headers(headers);
 
+    // Query Params
+    if !request.params.is_empty() {
+        req_builder = req_builder.query(&request.params);
+    }
+
     // Body
     if let Some(body) = &request.body {
         req_builder = req_builder.body(body.clone());
