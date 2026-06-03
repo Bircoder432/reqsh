@@ -45,6 +45,10 @@ impl ShellState {
         self.saved_requests.get(name)
     }
 
+    pub fn get_all_requests(&self) -> &HashMap<String, Request> {
+        &self.saved_requests
+    }
+
     pub fn get_base_url(&self) -> Option<&str> {
         self.base_url.as_deref()
     }

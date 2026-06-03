@@ -20,6 +20,7 @@ pub enum Builtin {
     UnsetHeader(String),
     Headers,
     Vars,
+    Requests,
 }
 
 pub enum ControlFlow {
@@ -53,7 +54,13 @@ pub fn handle(
 
         Builtin::Vars => {
             for var in ctx.get_variables().iter() {
-                println!("{} = {}", var.0, var.1)
+                println!("{} = {}", var.0, var.1);
+            }
+        }
+
+        Builtin::Requests => {
+            for (name, req) in ctx.get_all_requests() {
+                println!("{} ({}) {}", name, req.method.as_str(), req.path);
             }
         }
 

@@ -43,6 +43,7 @@ pub fn help_text() -> String {
     unset header <key>
     save <name>
     run <name>
+    requests
     vars
     headers
     history
