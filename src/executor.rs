@@ -56,7 +56,7 @@ pub fn execute(req: Request, ctx: &ShellState) -> Result<String, String> {
     let response = fetch(&req, base_url, global_headers);
 
     match response {
-        Ok(r) => Ok(display_response(r)),
+        Ok((res, duration)) => Ok(display_response(res, duration)),
         Err(e) => Err(e),
     }
 }
