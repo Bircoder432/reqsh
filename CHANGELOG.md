@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 (2026-06-09)
+
+- Response time displayed with each request
+- Windows binary support (x86_64-pc-windows-msvc)
+- Absolute URLs now work (not just relative paths with `base`)
+
 ## 0.1.2 (2026-06-06)
 
 - Variable interpolation with `{{name}}` syntax in paths, headers, and body

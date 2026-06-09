@@ -18,6 +18,8 @@ Interactive HTTP shell for API workflows. Send HTTP requests, manage headers and
 - Variable interpolation with `{{name}}` syntax in paths, headers, and body
 - Query parameter support with `param: key=value` lines
 - Save and run requests in-session
+- Response time displayed per request
+- Full absolute URL support (base URL not required)
 - JSON response pretty-printing
 - Command history and rerun by index
 - Colored terminal output
@@ -32,7 +34,7 @@ curl -fsSL https://raw.githubusercontent.com/hars-21/reqsh/main/install.sh | sh
 
 ### Pre-built binary
 
-Download the latest binary from the [releases page](https://github.com/hars-21/reqsh/releases/latest).
+Download the latest binary for your platform from the [releases page](https://github.com/hars-21/reqsh/releases/latest). macOS (Intel & Silicon), Linux (x86_64), and Windows (x86_64) are available.
 
 ### Build from source
 
@@ -59,16 +61,22 @@ Start the REPL:
 reqsh
 ```
 
-Set a base URL:
+Set a base URL (optional — you can use absolute URLs directly):
 
 ```bash
 reqsh> base https://api.example.com
 ```
 
-Send a GET request:
+Send a GET request (relative path requires a base URL):
 
 ```bash
 reqsh> GET /users
+```
+
+Or use an absolute URL directly:
+
+```bash
+reqsh> GET https://jsonplaceholder.typicode.com/posts
 ```
 
 Send a POST request with headers and body:
@@ -86,10 +94,10 @@ reqsh> POST /users
 
 | Command                | Description                          |
 | ---------------------- | ------------------------------------ |
-| `GET <path>`           | Send GET request                     |
-| `POST <path>`          | Send POST request                    |
-| `PUT <path>`           | Send PUT request                     |
-| `DELETE <path>`        | Send DELETE request                  |
+| `GET <url>`            | Send GET request                     |
+| `POST <url>`           | Send POST request                    |
+| `PUT <url>`            | Send PUT request                     |
+| `DELETE <url>`         | Send DELETE request                  |
 | `base <url>`           | Set base URL for all requests        |
 | `header <key> <value>` | Set a global header for all requests |
 | `set <name> <value>`   | Set a session variable               |

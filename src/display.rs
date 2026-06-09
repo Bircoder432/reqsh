@@ -1,7 +1,9 @@
+use std::time::Duration;
+
 use colored::Colorize;
 use reqwest::blocking::Response;
 
-pub fn display_response(res: Response) -> String {
+pub fn display_response(res: Response, response_time: Duration) -> String {
     let mut output = String::new();
 
     let status = res.status();
@@ -18,10 +20,11 @@ pub fn display_response(res: Response) -> String {
     };
 
     let status_line = format!(
-        "{} {} {}\n",
+        "{} {} {} {}\n",
         format!("{:?}", res.version()).magenta(),
-        status_color.bold(),
-        reason_color.bold()
+        status_color,
+        reason_color,
+        format!("{}ms", response_time.as_millis()).bright_yellow(),
     );
 
     output.push_str(&status_line);

@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
 
 use crate::request::{Method, Request};
 use reqwest::{
@@ -10,15 +13,18 @@ pub fn fetch(
     request: &Request,
     base_url: Option<&str>,
     global_headers: &HashMap<String, String>,
-) -> Result<Response, String> {
+) -> Result<(Response, Duration), String> {
     // Client
     let client = Client::new();
 
     // Url Constructor
-    let full_url = if (request.path.starts_with("/"))
+    let full_url = if request.path.starts_with("http://") || request.path.starts_with("https://") {
+        request.path.clone()
+    } else if request.path.starts_with("/")
         && let Some(base_url) = base_url
     {
-        format!("{base_url}{}", request.path)
+        let base = base_url.trim_end_matches('/');
+        format!("{base}{}", request.path)
     } else {
         return Err(String::from(
             "Base URL not found. Use base <url> to add base url",
@@ -52,7 +58,9 @@ pub fn fetch(
             HeaderValue::from_bytes(value.as_bytes()).unwrap(),
         );
     }
-    headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
+    if !headers.contains_key(CONTENT_TYPE) {
+        headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
+    }
     req_builder = req_builder.headers(headers);
 
     // Query Params
@@ -65,11 +73,15 @@ pub fn fetch(
         req_builder = req_builder.body(body.clone());
     }
 
+    // Timer
+    let now = Instant::now();
+
     // Response
     let result = req_builder.send();
+    let response_time = now.elapsed();
 
     match result {
-        Ok(response) => Ok(response),
+        Ok(response) => Ok((response, response_time)),
         Err(e) => Err(format!("{}", e)),
     }
 }
