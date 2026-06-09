@@ -11,12 +11,19 @@ echo "Installing $BIN_NAME..."
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
-case "$OS" in
-    Linux)
+case "$(echo "$OS" | tr '[:upper:]' '[:lower:]')" in
+    linux)
         OS="unknown-linux-gnu"
+        EXT="tar.gz"
         ;;
-    Darwin)
+    darwin)
         OS="apple-darwin"
+        EXT="tar.gz"
+        ;;
+    mingw*|msys*)
+        OS="pc-windows-msvc"
+        EXT="zip"
+        BIN_NAME="reqsh.exe"
         ;;
     *)
         echo "Unsupported OS: $OS"
@@ -50,7 +57,7 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-FILE="${BIN_NAME}-${VERSION}-${TARGET}.tar.gz"
+FILE="${BIN_NAME}-${VERSION}-${TARGET}.${EXT}"
 
 URL="https://github.com/${REPO}/releases/download/${VERSION}/${FILE}"
 
@@ -63,9 +70,13 @@ echo "Downloading $FILE..."
 curl -fsSL "$URL" -o "$ARCHIVE_PATH"
 
 echo "Extracting archive..."
-tar -xzf "$ARCHIVE_PATH" -C "$TMP_DIR"
+if [ "$EXT" = "zip" ]; then
+    unzip -o "$ARCHIVE_PATH" -d "$TMP_DIR"
+else
+    tar -xzf "$ARCHIVE_PATH" -C "$TMP_DIR"
+fi
 
-chmod +x "$TMP_DIR/$BIN_NAME"
+chmod +x "$TMP_DIR/$BIN_NAME" 2>/dev/null || true
 
 mkdir -p "$INSTALL_DIR"
 
