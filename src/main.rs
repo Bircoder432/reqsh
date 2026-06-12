@@ -59,7 +59,7 @@ fn shell_loop() {
                                 break;
                             }
                             Err(e) => {
-                                println!("{}", e.red().bold());
+                                eprintln!("{}", e.red().bold());
                             }
                         },
 
@@ -70,7 +70,7 @@ fn shell_loop() {
                                     println!("{}", res);
                                 }
                                 Err(e) => {
-                                    println!("{}", e.red().bold());
+                                    eprintln!("{}", e.red().bold());
                                 }
                             }
                         }
@@ -82,7 +82,7 @@ fn shell_loop() {
                     },
 
                     Err(e) => {
-                        println!("{}", e.red().bold());
+                        eprintln!("{}", e.red().bold());
                     }
                 }
             }
@@ -96,7 +96,7 @@ fn shell_loop() {
             }
 
             Err(err) => {
-                println!("Error: {:?}", err);
+                eprintln!("Error: {:?}", err);
                 break;
             }
         }
@@ -132,7 +132,7 @@ fn collect_input(rl: &mut Editor<ShellHelper, FileHistory>, first_line: String) 
             }
 
             Err(err) => {
-                println!("Error: {:?}", err);
+                eprintln!("Error: {:?}", err);
                 buffer.clear();
                 continue;
             }
