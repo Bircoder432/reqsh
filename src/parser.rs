@@ -19,7 +19,7 @@ pub fn parse(input: String) -> Result<Parsed, String> {
 
     let token_match = tokens[0].to_lowercase();
     match token_match.as_str() {
-        "get" | "post" | "put" | "delete" => {
+        "get" | "post" | "put" | "patch" | "delete" => {
             let result = parse_request(input)?;
             Ok(Parsed::Request(result))
         }
@@ -32,7 +32,7 @@ pub fn parse(input: String) -> Result<Parsed, String> {
 
         "exit" => Ok(Parsed::Exit),
 
-        _ => Err(format!("Reference Error: {} not defined", tokens[0])),
+        _ => Err(format!("Unknown command: {} not defined", tokens[0])),
     }
 }
 
