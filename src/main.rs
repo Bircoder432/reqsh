@@ -60,6 +60,9 @@ fn run_repl(ctx: Rc<RefCell<ShellState>>) {
                             match handle(cmd, &mut state, rl.history()) {
                                 Ok(ControlFlow::Continue) => {}
                                 Ok(ControlFlow::Exit) => {
+                                    if let Err(e) = state.save() {
+                                        eprintln!("Failed to save state: {}", e);
+                                    }
                                     break;
                                 }
                                 Err(e) => {
@@ -83,6 +86,9 @@ fn run_repl(ctx: Rc<RefCell<ShellState>>) {
 
                         Parsed::Exit => {
                             println!("{}", "Bye!".dimmed());
+                            if let Err(e) = ctx.borrow().save() {
+                                eprintln!("Failed to save state: {}", e);
+                            }
                             break;
                         }
                     },
@@ -155,7 +161,7 @@ fn main() {
 
     match args.as_slice() {
         [] => {
-            let ctx = Rc::new(RefCell::new(ShellState::new()));
+            let ctx = Rc::new(RefCell::new(ShellState::load()));
             run_repl(ctx);
         }
 
