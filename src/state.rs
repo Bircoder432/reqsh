@@ -9,7 +9,6 @@ pub struct ShellState {
     base_url: Option<String>,
     headers: HashMap<String, String>,
     variables: HashMap<String, String>,
-    #[serde(skip)]
     last_request: Option<Request>,
     saved_requests: HashMap<String, Request>,
     timeout_secs: Option<u64>,
